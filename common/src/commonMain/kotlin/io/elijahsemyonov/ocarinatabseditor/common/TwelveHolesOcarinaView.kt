@@ -67,7 +67,7 @@ val TWELVE_HOLES_OCARINA_NOTES_BITSETS_MAP = TWELVE_HOLES_OCARINA_NOTES_BITSETS_
 
 @Composable
 fun TwelveHolesOcarinaWithNoteView(modifier: Modifier, note: Note) {
-    val bitset = TWELVE_HOLES_OCARINA_NOTES_BITSETS_MAP[note] ?: 0u
+    val bitset = TWELVE_HOLES_OCARINA_NOTES_BITSETS_MAP[note]
 
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         TwelveHolesOcarinaView(modifier, bitset)
