@@ -57,7 +57,7 @@ val TWELVE_HOLES_OCARINA_NOTES_BITSETS_LIST = arrayOf(
     ASharp(4u) to 0b1001_0010_00_11u,
     B(4u) to 0b1001_0000_00_11u,
     C(5u) to 0b0001_0000_00_11u,
-    CSharp(5u) to 0b0001_0000_01_01u,
+    CSharp(5u) to 0b0001_0010_00_01u,
     D(5u) to 0b0001_0000_00_01u,
     DSharp(5u) to 0b0001_0010_00_00u,
     E(5u) to 0b0001_0000_00_00u,
