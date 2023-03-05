@@ -2,6 +2,7 @@ package io.elijahsemyonov.ocarinatabseditor.common
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -14,10 +15,7 @@ import androidx.compose.ui.*
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Fill
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.*
 import androidx.compose.ui.unit.dp
 
 fun DrawScope.drawBezierSpline(
@@ -70,11 +68,8 @@ fun TwelveHolesOcarinaWithNoteView(modifier: Modifier, note: Note) {
     val bitset = TWELVE_HOLES_OCARINA_NOTES_BITSETS_MAP[note]
 
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        TwelveHolesOcarinaView(modifier, bitset)
-
-        Spacer(modifier = Modifier.height(8.dp))
-
         Text(text = note.name)
+        TwelveHolesOcarinaView(modifier, bitset)
     }
 }
 
@@ -101,62 +96,64 @@ fun TwelveHolesOcarinaView(modifier: Modifier, bitset: UInt?) {
             )
         }
 
-        rotate(-30f, offsetFromRelative(0.5f, 0.5f), block = {
-            rotate(10f, offsetFromRelative(0.5f, 0.5f), block = {
-                drawOval(
-                    color = Color.LightGray,
-                    topLeft = offsetFromRelative(0.2f, 0.37f),
-                    size = Size(size.width * 0.6f, size.height * 0.26f),
-                    style = Fill
-                )
+        translate(size.width * 0.0f, size.height * -0.1f, block = {
+            scale(1.6f, offsetFromRelative(0.5f, 0.5f), block = {
+                rotate(-30f, offsetFromRelative(0.5f, 0.5f), block = {
+                    rotate(10f, offsetFromRelative(0.5f, 0.5f), block = {
+                        drawOval(
+                            color = Color.LightGray,
+                            topLeft = offsetFromRelative(0.2f, 0.37f),
+                            size = Size(size.width * 0.6f, size.height * 0.26f),
+                            style = Fill
+                        )
 
-                drawOval(
-                    color = Color.LightGray,
-                    topLeft = offsetFromRelative(0.41f, 0.5f),
-                    size = Size(size.width * 0.15f, size.height * 0.3f),
-                    style = Fill
-                )
+                        drawOval(
+                            color = Color.LightGray,
+                            topLeft = offsetFromRelative(0.41f, 0.5f),
+                            size = Size(size.width * 0.15f, size.height * 0.3f),
+                            style = Fill
+                        )
+                    })
+
+
+                    if (bitset == null) {
+                        return@rotate
+                    }
+
+                    val isFilled = { holeBitOffset: Int ->
+                        bitset and (1u shl (11 - holeBitOffset)) != 0u
+                    }
+
+                    drawHole(0.29f, 0.45f, isFilled(0), false)
+                    drawHole(0.35f, 0.48f, isFilled(1), false)
+                    drawHole(0.41f, 0.49f, isFilled(2), false)
+                    drawHole(0.47f, 0.48f, isFilled(3), false)
+
+                    drawHole(0.53f, 0.54f, isFilled(4), false)
+                    drawHole(0.59f, 0.52f, isFilled(5), false)
+                    drawHole(0.65f, 0.52f, isFilled(6), false)
+                    drawHole(0.71f, 0.54f, isFilled(7), false)
+
+                    drawHole(0.35f, 0.53f, isFilled(8), true)
+                    drawHole(0.59f, 0.47f, isFilled(9), true)
+
+                    drawHole(0.32f, 0.68f, isFilled(10), false)
+                    drawHole(0.58f, 0.7f, isFilled(11), false)
+                })
             })
-
-
-            if (bitset == null) {
-                return@rotate
-            }
-
-            val isFilled = { holeBitOffset: Int ->
-                bitset and (1u shl (11 - holeBitOffset)) != 0u
-            }
-
-            drawHole(0.29f, 0.45f, isFilled(0), false)
-            drawHole(0.35f, 0.48f, isFilled(1), false)
-            drawHole(0.41f, 0.49f, isFilled(2), false)
-            drawHole(0.47f, 0.48f, isFilled(3), false)
-
-            drawHole(0.53f, 0.54f, isFilled(4), false)
-            drawHole(0.59f, 0.52f, isFilled(5), false)
-            drawHole(0.65f, 0.52f, isFilled(6), false)
-            drawHole(0.71f, 0.54f, isFilled(7), false)
-
-            drawHole(0.35f, 0.53f, isFilled(8), true)
-            drawHole(0.59f, 0.47f, isFilled(9), true)
-
-            drawHole(0.32f, 0.68f, isFilled(10), false)
-            drawHole(0.58f, 0.7f, isFilled(11), false)
         })
-
     }
 }
 
 @Preview
 @Composable
 fun TwelveHolesOcarinaViewPreview() {
-    LazyVerticalGrid(columns = GridCells.Adaptive(200.dp), contentPadding = PaddingValues(32.dp)) {
-        item {
-            TwelveHolesOcarinaWithNoteView(Modifier.width(140.dp), A(0u))
-        }
-
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(200.dp),
+        contentPadding = PaddingValues(16.dp),
+    ) {
         items(TWELVE_HOLES_OCARINA_NOTES_BITSETS_LIST) { (note, _) ->
-            TwelveHolesOcarinaWithNoteView(Modifier.width(140.dp), note)
+            TwelveHolesOcarinaWithNoteView(Modifier.fillMaxWidth().padding(16.dp), note)
         }
     }
 }
