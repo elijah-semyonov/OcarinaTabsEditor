@@ -14,5 +14,5 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun App() {
-    TwelveHolesOcarinaView(Modifier.fillMaxSize())
+    TwelveHolesOcarinaViewPreview()
 }

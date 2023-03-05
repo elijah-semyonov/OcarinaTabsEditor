@@ -2,9 +2,13 @@ package io.elijahsemyonov.ocarinatabseditor.common
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.geometry.Offset
@@ -34,9 +38,49 @@ fun DrawScope.drawBezierSpline(
     }
 }
 
+//kotlin USHort postfix
+
+val TWELVE_HOLES_OCARINA_NOTES_BITSETS_LIST = arrayOf(
+    A(3u) to 0b1111_1111_11_11u,
+    ASharp(3u) to 0b1111_1111_10_11u,
+    B(3u) to 0b1111_1111_01_11u,
+    C(4u) to 0b1111_1111_00_11u,
+    CSharp(4u) to 0b1111_1110_01_11u,
+    D(4u) to 0b1111_1110_00_11u,
+    DSharp(4u) to 0b1111_1100_01_11u,
+    E(4u) to 0b1111_1100_00_11u,
+    F(4u) to 0b1111_1000_00_11u,
+    FSharp(4u) to 0b1111_0010_00_11u,
+    G(4u) to 0b1111_0000_00_11u,
+    GSharp(4u) to 0b1101_0010_00_11u,
+    A(4u) to 0b1101_0000_00_11u,
+    ASharp(4u) to 0b1001_0010_00_11u,
+    B(4u) to 0b1001_0000_00_11u,
+    C(5u) to 0b0001_0000_00_11u,
+    CSharp(5u) to 0b0001_0000_01_01u,
+    D(5u) to 0b0001_0000_00_01u,
+    DSharp(5u) to 0b0001_0010_00_00u,
+    E(5u) to 0b0001_0000_00_00u,
+    F(5u) to 0b0000_0000_00_00u,
+)
+val TWELVE_HOLES_OCARINA_NOTES_BITSETS_MAP = TWELVE_HOLES_OCARINA_NOTES_BITSETS_LIST.toMap()
+
 @Composable
-fun TwelveHolesOcarinaView(modifier: Modifier) {
-    Canvas(modifier) {
+fun TwelveHolesOcarinaWithNoteView(modifier: Modifier, note: Note) {
+    val bitset = TWELVE_HOLES_OCARINA_NOTES_BITSETS_MAP[note] ?: 0u
+
+    Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        TwelveHolesOcarinaView(modifier, bitset)
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(text = note.name)
+    }
+}
+
+@Composable
+fun TwelveHolesOcarinaView(modifier: Modifier, bitset: UInt?) {
+    Canvas(modifier.aspectRatio(1f)) {
         val size = size
 
         val offsetFromRelative = { x: Float, y: Float -> Offset(size.width * x, size.height * y) }
@@ -75,21 +119,29 @@ fun TwelveHolesOcarinaView(modifier: Modifier) {
             })
 
 
-            drawHole(0.29f, 0.45f, false, false)
-            drawHole(0.35f, 0.48f, false, false)
-            drawHole(0.41f, 0.49f, false, false)
-            drawHole(0.47f, 0.48f, false, false)
+            if (bitset == null) {
+                return@rotate
+            }
 
-            drawHole(0.53f, 0.54f, false, false)
-            drawHole(0.59f, 0.52f, false, false)
-            drawHole(0.65f, 0.52f, false, false)
-            drawHole(0.71f, 0.54f, false, false)
+            val isFilled = { holeBitOffset: Int ->
+                bitset and (1u shl (11 - holeBitOffset)) != 0u
+            }
 
-            drawHole(0.35f, 0.53f, false, true)
-            drawHole(0.59f, 0.47f, false, true)
+            drawHole(0.29f, 0.45f, isFilled(0), false)
+            drawHole(0.35f, 0.48f, isFilled(1), false)
+            drawHole(0.41f, 0.49f, isFilled(2), false)
+            drawHole(0.47f, 0.48f, isFilled(3), false)
 
-            drawHole(0.32f, 0.68f, false, false)
-            drawHole(0.58f, 0.7f, false, false)
+            drawHole(0.53f, 0.54f, isFilled(4), false)
+            drawHole(0.59f, 0.52f, isFilled(5), false)
+            drawHole(0.65f, 0.52f, isFilled(6), false)
+            drawHole(0.71f, 0.54f, isFilled(7), false)
+
+            drawHole(0.35f, 0.53f, isFilled(8), true)
+            drawHole(0.59f, 0.47f, isFilled(9), true)
+
+            drawHole(0.32f, 0.68f, isFilled(10), false)
+            drawHole(0.58f, 0.7f, isFilled(11), false)
         })
 
     }
@@ -98,7 +150,13 @@ fun TwelveHolesOcarinaView(modifier: Modifier) {
 @Preview
 @Composable
 fun TwelveHolesOcarinaViewPreview() {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        TwelveHolesOcarinaView(Modifier.size(200.dp))
+    LazyVerticalGrid(columns = GridCells.Adaptive(200.dp), contentPadding = PaddingValues(32.dp)) {
+        item {
+            TwelveHolesOcarinaWithNoteView(Modifier.width(140.dp), A(0u))
+        }
+
+        items(TWELVE_HOLES_OCARINA_NOTES_BITSETS_LIST) { (note, _) ->
+            TwelveHolesOcarinaWithNoteView(Modifier.width(140.dp), note)
+        }
     }
 }
